@@ -20,12 +20,16 @@ export class ChatService {
     async sendMessage(input: CreateChatDto): Promise<Chat> {
         const { content, group_id, sender_id } = input
 
-        const user = await this.userRepository.findOne(sender_id)
+        const user = await this.userRepository.findOneByWithOutThrowError({
+            id: sender_id,
+        })
         if (!user) {
             throw new BadRequestException('User not found')
         }
 
-        const group = await this.groupRepository.findOne(group_id)
+        const group = await this.groupRepository.findOneByWithOutThrowError({
+            id: group_id,
+        })
         if (!group) {
             throw new BadRequestException('Group not found')
         }
@@ -46,14 +50,20 @@ export class ChatService {
     }
 
     async getMessages(
-        gorup_id: number,
+        group_id: number,
         query: QueryParams<Chat>,
     ): Promise<FindAll<Chat>> {
         const { page, take } = query
+        query.filter = {
+            ...query?.filter,
+            group: {
+                id: group_id,
+            },
+        }
         return await this.chatRepository.findAll({
             page,
             take,
-            filter: { group: { id: gorup_id } },
+            filter: query.filter,
             relation: { sender: true, group: true },
             select: {
                 sender: { id: true, username: true },
