@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common'
-import { DatabaseModule } from '../database/database.module'
+import { DatabaseModule } from 'src/shared/database/database.module'
 import { UserModule } from '../user/user.module'
 import { GroupController } from './group.controller'
 import { GroupService } from './group.service'
