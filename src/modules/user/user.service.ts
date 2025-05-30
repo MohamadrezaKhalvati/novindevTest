@@ -1,7 +1,6 @@
-import { Injectable } from '@nestjs/common'
-import { QueryParams } from '../../base/validators/query-param.validator'
+import { BadRequestException, Injectable } from '@nestjs/common'
+import { SingleQueryParams } from 'src/base/validators/query-param.validator'
 import { CreateUserDto } from './dto/create-user.dto'
-import { UpdateUserDto } from './dto/update-user.dto'
 import { User } from './entities/user.entity'
 import { UserRepository } from './repositories/user.repository'
 
@@ -9,23 +8,29 @@ import { UserRepository } from './repositories/user.repository'
 export class UserService {
     constructor(private readonly userRepository: UserRepository) {}
 
-    async create(createUserDto: CreateUserDto): Promise<User> {
-        return this.userRepository.create(createUserDto)
+    async createUser(dto: CreateUserDto): Promise<User> {
+        const { username, email } = dto
+
+        const existingUser = await this.userRepository.findOneBy({ username })
+        if (existingUser) {
+            throw new BadRequestException('Username already exists')
+        }
+
+        const existingEmail = await this.userRepository.findByEmail(email)
+        if (existingEmail) {
+            throw new BadRequestException('Email already exists')
+        }
+
+        return await this.userRepository.create({
+            username,
+            email,
+        })
     }
 
-    async findAll(query?: QueryParams<User>) {
-        return this.userRepository.findAll(query)
-    }
-
-    async findOne(id: number) {
-        return this.userRepository.findOne(id)
-    }
-
-    async update(id: number, updateUserDto: UpdateUserDto) {
-        return this.userRepository.update(id, updateUserDto)
-    }
-
-    async remove(id: number) {
-        return this.userRepository.softDelete(id)
+    async getUserById(
+        id: number,
+        query: SingleQueryParams<User>,
+    ): Promise<User> {
+        return await this.userRepository.findOne(id, query)
     }
 }

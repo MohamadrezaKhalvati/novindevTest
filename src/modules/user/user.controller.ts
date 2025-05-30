@@ -1,15 +1,16 @@
 import {
 	Body,
 	Controller,
-	Delete,
 	Get,
 	Param,
-	Patch,
+	ParseIntPipe,
 	Post,
+	Query,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
+import { SingleQueryParams } from 'src/base/validators/query-param.validator'
 import { CreateUserDto } from './dto/create-user.dto'
-import { UpdateUserDto } from './dto/update-user.dto'
+import { User } from './entities/user.entity'
 import { UserService } from './user.service'
 
 @Controller('user')
@@ -18,27 +19,15 @@ export class UserController {
     constructor(private readonly userService: UserService) {}
 
     @Post()
-    create(@Body() createUserDto: CreateUserDto) {
-        return this.userService.create(createUserDto)
-    }
-
-    @Get()
-    findAll() {
-        return this.userService.findAll()
+    createUser(@Body() input: CreateUserDto): Promise<User> {
+        return this.userService.createUser(input)
     }
 
     @Get(':id')
-    findOne(@Param('id') id: string) {
-        return this.userService.findOne(+id)
-    }
-
-    @Patch(':id')
-    update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-        return this.userService.update(+id, updateUserDto)
-    }
-
-    @Delete(':id')
-    remove(@Param('id') id: string) {
-        return this.userService.remove(+id)
+    async getUserById(
+        @Param('id', ParseIntPipe) id: number,
+        @Query() query: SingleQueryParams<User>,
+    ): Promise<User> {
+        return await this.userService.getUserById(id, query)
     }
 }

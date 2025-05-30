@@ -1,15 +1,7 @@
-import {
-	Body,
-	Controller,
-	Delete,
-	Get,
-	Param,
-	Patch,
-	Post,
-} from '@nestjs/common'
+import { Body, Controller, Param, ParseIntPipe, Post } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
-import { CreateGroupDto } from './dto/create-group.dto'
-import { UpdateGroupDto } from './dto/update-group.dto'
+import { CreateGroupDto, JoinGroupDto } from './dto/create-group.dto'
+import { Group } from './entities/group.entity'
 import { GroupService } from './group.service'
 
 @Controller('group')
@@ -18,27 +10,15 @@ export class GroupController {
     constructor(private readonly groupService: GroupService) {}
 
     @Post()
-    create(@Body() createGroupDto: CreateGroupDto) {
-        return this.groupService.create(createGroupDto)
+    async createGroup(@Body() dto: CreateGroupDto): Promise<Group> {
+        return await this.groupService.createGroup(dto)
     }
 
-    @Get()
-    findAll() {
-        return this.groupService.findAll()
-    }
-
-    @Get(':id')
-    findOne(@Param('id') id: string) {
-        return this.groupService.findOne(+id)
-    }
-
-    @Patch(':id')
-    update(@Param('id') id: string, @Body() updateGroupDto: UpdateGroupDto) {
-        return this.groupService.update(+id, updateGroupDto)
-    }
-
-    @Delete(':id')
-    remove(@Param('id') id: string) {
-        return this.groupService.remove(+id)
+    @Post(':id/join')
+    async joinGroup(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() input: JoinGroupDto,
+    ): Promise<Group> {
+        return await this.groupService.joinGroup(id, input)
     }
 }

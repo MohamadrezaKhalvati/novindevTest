@@ -1,31 +1,32 @@
-import { Injectable } from '@nestjs/common'
-import { QueryParams } from '../../base/validators/query-param.validator'
-import { CreateGroupDto } from './dto/create-group.dto'
-import { UpdateGroupDto } from './dto/update-group.dto'
+import { BadRequestException, Injectable } from '@nestjs/common'
+import { UserRepository } from '../user/repositories/user.repository'
+import { CreateGroupDto, JoinGroupDto } from './dto/create-group.dto'
 import { Group } from './entities/group.entity'
 import { GroupRepository } from './repositories/group.repository'
 
 @Injectable()
 export class GroupService {
-    constructor(private readonly groupRepository: GroupRepository) {}
+    constructor(
+        private readonly groupRepository: GroupRepository,
+        private readonly userRepository: UserRepository,
+    ) {}
 
-    async create(createGroupDto: CreateGroupDto): Promise<Group> {
-        return this.groupRepository.create(createGroupDto)
+    async createGroup(input: CreateGroupDto): Promise<Group> {
+        return await this.groupRepository.create(input)
     }
 
-    async findAll(query?: QueryParams<Group>) {
-        return this.groupRepository.findAll(query)
-    }
-
-    async findOne(id: number) {
-        return this.groupRepository.findOne(id)
-    }
-
-    async update(id: number, updateGroupDto: UpdateGroupDto) {
-        return this.groupRepository.update(id, updateGroupDto)
-    }
-
-    async remove(id: number) {
-        return this.groupRepository.softDelete(id)
+    async joinGroup(group_id: number, input: JoinGroupDto): Promise<Group> {
+        const group = await this.groupRepository.findOne(group_id, {
+            relation: { members: true },
+        })
+        const user = await this.userRepository.findOne(input.user_id)
+        if (!user) {
+            throw new BadRequestException('User not found')
+        }
+        if (group.members.some(member => member.id === user.id)) {
+            throw new BadRequestException('User already in group')
+        }
+        group.members.push(user)
+        return await this.groupRepository.update(group_id, group)
     }
 }

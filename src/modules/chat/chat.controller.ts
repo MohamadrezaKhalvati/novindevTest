@@ -1,16 +1,18 @@
 import {
 	Body,
 	Controller,
-	Delete,
 	Get,
 	Param,
-	Patch,
+	ParseIntPipe,
 	Post,
+	Query,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
+import { FindAll } from 'src/base/interfaces/find-all'
+import { QueryParams } from 'src/base/validators/query-param.validator'
 import { ChatService } from './chat.service'
 import { CreateChatDto } from './dto/create-chat.dto'
-import { UpdateChatDto } from './dto/update-chat.dto'
+import { Chat } from './entities/chat.entity'
 
 @Controller('chat')
 @ApiTags('Chat')
@@ -18,27 +20,15 @@ export class ChatController {
     constructor(private readonly chatService: ChatService) {}
 
     @Post()
-    create(@Body() createChatDto: CreateChatDto) {
-        return this.chatService.create(createChatDto)
+    async sendMessage(@Body() input: CreateChatDto): Promise<Chat> {
+        return await this.chatService.sendMessage(input)
     }
 
-    @Get()
-    findAll() {
-        return this.chatService.findAll()
-    }
-
-    @Get(':id')
-    findOne(@Param('id') id: string) {
-        return this.chatService.findOne(+id)
-    }
-
-    @Patch(':id')
-    update(@Param('id') id: string, @Body() updateChatDto: UpdateChatDto) {
-        return this.chatService.update(+id, updateChatDto)
-    }
-
-    @Delete(':id')
-    remove(@Param('id') id: string) {
-        return this.chatService.remove(+id)
+    @Get('/groups/:id/messages')
+    async getMessages(
+        @Param('id', ParseIntPipe) groupId: number,
+        @Query() query: QueryParams<Chat>,
+    ): Promise<FindAll<Chat>> {
+        return await this.chatService.getMessages(groupId, query)
     }
 }

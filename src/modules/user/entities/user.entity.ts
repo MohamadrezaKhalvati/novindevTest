@@ -11,9 +11,6 @@ export class User extends BaseEntity {
     @Column()
     email: string
 
-    @Column()
-    password: string // Should be hashed in practice
-
     @ManyToMany(() => Group, group => group.members)
     groups: Group[]
 
