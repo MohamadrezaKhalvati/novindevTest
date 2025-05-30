@@ -42,6 +42,7 @@ export abstract class BaseRepository<T> implements IBaseRepository<T> {
         try {
             body['createdAt'] = new Date()
             body['updatedAt'] = new Date()
+
             const data = await this.repository.create(body)
             return await this.repository.save(data)
         } catch (error) {
@@ -212,6 +213,23 @@ export abstract class BaseRepository<T> implements IBaseRepository<T> {
             throw new NotFoundException('Not Found')
         }
         return res
+    }
+
+    async findOneByWithOutThrowError(
+        obj: Partial<T>,
+        query?: SingleQueryParams<T>,
+    ): Promise<T | null> {
+        if (query?.relation)
+            query.relation = this.parseBooleanValues(query?.relation)
+
+        return await this.repository.findOne({
+            where: obj,
+            relations: query?.relation,
+            select: query?.select,
+            order: {
+                id: 'DESC',
+            },
+        })
     }
 
     async update(id: number, body: Partial<T>) {

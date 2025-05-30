@@ -10,6 +10,10 @@ export class CreateGroupDto {
     @IsString()
     @IsOptional()
     description?: string
+
+    @ApiProperty()
+    @IsInt()
+    user_id: number
 }
 
 export class JoinGroupDto {

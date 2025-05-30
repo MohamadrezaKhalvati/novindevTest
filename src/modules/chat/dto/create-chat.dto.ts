@@ -8,9 +8,9 @@ export class CreateChatDto {
 
     @ApiProperty()
     @IsInt()
-    senderId: number
+    sender_id: number
 
     @ApiProperty()
     @IsInt()
-    groupId: number
+    group_id: number
 }

@@ -1,7 +1,7 @@
 import { BaseEntity } from 'src/base/entity/base.entity'
 import { Chat } from 'src/modules/chat/entities/chat.entity'
-import { Group } from 'src/modules/group/entities/group.entity'
-import { Column, Entity, ManyToMany, OneToMany } from 'typeorm'
+import { UserGroup } from 'src/modules/group/entities/user-group.entity'
+import { Column, Entity, OneToMany } from 'typeorm'
 
 @Entity()
 export class User extends BaseEntity {
@@ -11,8 +11,8 @@ export class User extends BaseEntity {
     @Column()
     email: string
 
-    @ManyToMany(() => Group, group => group.members)
-    groups: Group[]
+    @OneToMany('UserGroup', 'user')
+    userGroups: UserGroup[]
 
     @OneToMany(() => Chat, chat => chat.sender)
     messages: Chat[]

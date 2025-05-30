@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common'
 import { FindAll } from 'src/base/interfaces/find-all'
 import { QueryParams } from 'src/base/validators/query-param.validator'
 import { GroupRepository } from '../group/repositories/group.repository'
+import { UserGroupRepository } from '../group/repositories/user-group.repository'
 import { UserRepository } from '../user/repositories/user.repository'
 import { CreateChatDto } from './dto/create-chat.dto'
 import { Chat } from './entities/chat.entity'
@@ -13,24 +14,27 @@ export class ChatService {
         private readonly chatRepository: ChatRepository,
         private readonly userRepository: UserRepository,
         private readonly groupRepository: GroupRepository,
+        private readonly userGroupRepository: UserGroupRepository,
     ) {}
 
     async sendMessage(input: CreateChatDto): Promise<Chat> {
-        const { content, senderId, groupId } = input
+        const { content, group_id, sender_id } = input
 
-        const user = await this.userRepository.findOne(senderId)
+        const user = await this.userRepository.findOne(sender_id)
         if (!user) {
             throw new BadRequestException('User not found')
         }
 
-        const group = await this.groupRepository.findOne(groupId, {
-            relation: { members: true },
-        })
+        const group = await this.groupRepository.findOne(group_id)
         if (!group) {
             throw new BadRequestException('Group not found')
         }
 
-        if (!group.members.some(member => member.id === senderId)) {
+        const isMember = await this.userGroupRepository.findByUserAndGroup(
+            sender_id,
+            group_id,
+        )
+        if (!isMember) {
             throw new BadRequestException('User is not a member of the group')
         }
 
@@ -42,14 +46,14 @@ export class ChatService {
     }
 
     async getMessages(
-        group_id: number,
+        gorup_id: number,
         query: QueryParams<Chat>,
     ): Promise<FindAll<Chat>> {
         const { page, take } = query
         return await this.chatRepository.findAll({
             page,
             take,
-            filter: { group: { id: group_id } },
+            filter: { group: { id: gorup_id } },
             relation: { sender: true, group: true },
             select: {
                 sender: { id: true, username: true },

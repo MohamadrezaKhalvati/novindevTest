@@ -8,10 +8,10 @@ import { UserRepository } from './repositories/user.repository'
 export class UserService {
     constructor(private readonly userRepository: UserRepository) {}
 
-    async createUser(dto: CreateUserDto): Promise<User> {
-        const { username, email } = dto
+    async createUser(input: CreateUserDto): Promise<User> {
+        const { username, email } = input
 
-        const existingUser = await this.userRepository.findOneBy({ username })
+        const existingUser = await this.userRepository.findByUsername(username)
         if (existingUser) {
             throw new BadRequestException('Username already exists')
         }

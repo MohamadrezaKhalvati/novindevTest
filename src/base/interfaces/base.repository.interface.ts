@@ -40,6 +40,11 @@ export interface IBaseRepository<T> {
         ignoreValidation?: boolean,
     ): Promise<T>
 
+    findOneByWithOutThrowError(
+        obj: Partial<T>,
+        query?: SingleQueryParams<T>,
+    ): Promise<T | null>
+
     update(id: number, body: Partial<T>): Promise<T>
 
     softDelete(id: number): Promise<T>

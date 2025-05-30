@@ -18,10 +18,10 @@ export class UserRepository
     }
 
     async findByUsername(username: string): Promise<User> {
-        return await super.findOneBy({ username })
+        return await super.findOneByWithOutThrowError({ username })
     }
 
     async findByEmail(email: string): Promise<User> {
-        return await super.findOneBy({ email })
+        return await super.findOneByWithOutThrowError({ email })
     }
 }
