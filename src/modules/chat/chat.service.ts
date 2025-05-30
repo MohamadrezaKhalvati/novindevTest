@@ -1,26 +1,31 @@
-import { Injectable } from '@nestjs/common';
-import { CreateChatDto } from './dto/create-chat.dto';
-import { UpdateChatDto } from './dto/update-chat.dto';
+import { Injectable } from '@nestjs/common'
+import { QueryParams } from '../../base/validators/query-param.validator'
+import { CreateChatDto } from './dto/create-chat.dto'
+import { UpdateChatDto } from './dto/update-chat.dto'
+import { Chat } from './entities/chat.entity'
+import { ChatRepository } from './repositories/chat.repository'
 
 @Injectable()
 export class ChatService {
-  create(createChatDto: CreateChatDto) {
-    return 'This action adds a new chat';
-  }
+    constructor(private readonly chatRepository: ChatRepository) {}
 
-  findAll() {
-    return `This action returns all chat`;
-  }
+    async create(createChatDto: CreateChatDto): Promise<Chat> {
+        return this.chatRepository.create(createChatDto)
+    }
 
-  findOne(id: number) {
-    return `This action returns a #${id} chat`;
-  }
+    async findAll(query?: QueryParams<Chat>) {
+        return this.chatRepository.findAll(query)
+    }
 
-  update(id: number, updateChatDto: UpdateChatDto) {
-    return `This action updates a #${id} chat`;
-  }
+    async findOne(id: number) {
+        return this.chatRepository.findOne(id)
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} chat`;
-  }
+    async update(id: number, updateChatDto: UpdateChatDto) {
+        return this.chatRepository.update(id, updateChatDto)
+    }
+
+    async remove(id: number) {
+        return this.chatRepository.softDelete(id)
+    }
 }

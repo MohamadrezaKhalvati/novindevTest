@@ -17,14 +17,13 @@ export const databaseConfig: TypeOrmModuleOptions & SeederOptions = {
     username: process.env.POSTGRES_USER,
     password: process.env.POSTGRES_PASSWORD,
     database: process.env.POSTGRES_DB,
-    synchronize: process.env.POSTGRES_SYNCHRONIZE,
+    synchronize: process.env.POSTGRES_SYNCHRONIZE === 'true',
     entities: TypeOrmModels,
     migrations: [path.join(process.cwd(), '../database/migrations/*{.js,.ts}')],
     seeds: ['src/database/seeder/seeds/**/*{.ts,.js}'],
     factories: ['src/database/seeder/factories/**/*{.ts,.js}'],
     logging: false,
 }
-
 
 export const dataSource = new DataSource(databaseConfig as DataSourceOptions)
 
@@ -33,36 +32,25 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
     constructor(private readonly configService: ConfigService<Env>) {}
 
     createTypeOrmOptions(): TypeOrmModuleOptions {
-        console.log('test', {
-            type: 'postgres',
-            host: this.configService.getOrThrow<string>('POSTGRES_HOST', 'localhost'),
-            port: this.configService.getOrThrow<number>('POSTGRES_PORT', 5432),
-            username: this.configService.getOrThrow<string>('POSTGRES_USER', 'user'),
-            password: this.configService.getOrThrow<string>(
-                'POSTGRES_PASSWORD',
-                'password',
-            ),
-            database: this.configService.getOrThrow<string>('POSTGRES_DB', 'database'),
-            entities: TypeOrmModels,
-            synchronize: this.configService.getOrThrow<boolean>(
-                'POSTGRES_SYNCHRONIZE',
-                true,
-            ),
-            migrations: [
-                path.join(__dirname, '../database/migrations/*{.ts,.js}'),
-            ],
-            logging: this.configService.getOrThrow<boolean>('POSTGRES_LOGGING', false),
-        })
         return {
             type: 'postgres',
-            host: this.configService.getOrThrow<string>('POSTGRES_HOST', 'localhost'),
+            host: this.configService.getOrThrow<string>(
+                'POSTGRES_HOST',
+                'localhost',
+            ),
             port: this.configService.getOrThrow<number>('POSTGRES_PORT', 5432),
-            username: this.configService.getOrThrow<string>('POSTGRES_USER', 'user'),
+            username: this.configService.getOrThrow<string>(
+                'POSTGRES_USERNAME',
+                'user',
+            ),
             password: this.configService.getOrThrow<string>(
                 'POSTGRES_PASSWORD',
                 'password',
             ),
-            database: this.configService.getOrThrow<string>('POSTGRES_DB', 'database'),
+            database: this.configService.getOrThrow<string>(
+                'POSTGRES__DATABASE',
+                'database',
+            ),
             entities: TypeOrmModels,
             synchronize: this.configService.getOrThrow<boolean>(
                 'POSTGRES_SYNCHRONIZE',
@@ -71,7 +59,10 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
             migrations: [
                 path.join(__dirname, '../database/migrations/*{.ts,.js}'),
             ],
-            logging: this.configService.getOrThrow<boolean>('POSTGRES_LOGGING', false),
+            logging: this.configService.getOrThrow<boolean>(
+                'POSTGRES_LOGGING',
+                false,
+            ),
         }
     }
 }
