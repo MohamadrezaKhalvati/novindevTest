@@ -17,24 +17,38 @@ export class GroupService {
     async createGroup(input: CreateGroupDto): Promise<Group> {
         const { user_id, name, description } = input
 
-        const existGroup =
-            await this.groupRepository.findOneByWithOutThrowError({
-                name: name,
-            })
+        return await this.groupRepository.executeInTransaction(
+            async entityManager => {
+                // Check if group exists
+                const existGroup = await entityManager.findOne(Group, {
+                    where: { name },
+                })
 
-        if (existGroup) {
-            throw new BadRequestException('Group is exist with this name')
-        }
-        const group = await this.groupRepository.create({ name, description })
+                if (existGroup) {
+                    throw new BadRequestException(
+                        'Group is exist with this name',
+                    )
+                }
 
-        await this.userGroupRepository.create({
-            user_id,
-            group_id: group.id,
-        })
+                // Create group
+                const group = await entityManager.save(Group, {
+                    name,
+                    description,
+                })
 
-        return await this.groupRepository.findOne(group.id, {
-            relation: { userGroups: { user: true } },
-        })
+                // Create user-group relation
+                await entityManager.save(UserGroup, {
+                    user_id,
+                    group_id: group.id,
+                })
+
+                // Return group with relations
+                return await entityManager.findOne(Group, {
+                    where: { id: group.id },
+                    relations: { userGroups: { user: true } },
+                })
+            },
+        )
     }
 
     async joinGroup(group_id: number, input: JoinGroupDto): Promise<UserGroup> {

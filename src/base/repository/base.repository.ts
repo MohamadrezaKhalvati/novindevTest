@@ -335,4 +335,24 @@ export abstract class BaseRepository<T> implements IBaseRepository<T> {
             throw new BadRequestException(error)
         }
     }
+
+    async executeInTransaction<R>(
+        operation: (entityManager: any) => Promise<R>,
+    ): Promise<R> {
+        const queryRunner =
+            this.repository.manager.connection.createQueryRunner()
+        await queryRunner.connect()
+        await queryRunner.startTransaction()
+
+        try {
+            const result = await operation(queryRunner.manager)
+            await queryRunner.commitTransaction()
+            return result
+        } catch (error) {
+            await queryRunner.rollbackTransaction()
+            throw new BadRequestException(error)
+        } finally {
+            await queryRunner.release()
+        }
+    }
 }
