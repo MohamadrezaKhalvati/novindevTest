@@ -3,9 +3,9 @@ export interface Env {
     PORT: string
     POSTGRES_HOST: string
     POSTGRES_PORT: string
-    POSTGRES_USERNAME: string
+    POSTGRES_USER: string
     POSTGRES_PASSWORD: string
-    POSTGRES__DATABASE: string
+    POSTGRES_DB: string
     POSTGRES_SYNCHRONIZE: string
     POSTGRES_LOGGING: string
     POSTGRES_SSL: string

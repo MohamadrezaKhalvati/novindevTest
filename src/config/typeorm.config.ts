@@ -40,7 +40,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
             ),
             port: this.configService.getOrThrow<number>('POSTGRES_PORT', 5432),
             username: this.configService.getOrThrow<string>(
-                'POSTGRES_USERNAME',
+                'POSTGRES_USER',
                 'user',
             ),
             password: this.configService.getOrThrow<string>(
@@ -48,7 +48,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
                 'password',
             ),
             database: this.configService.getOrThrow<string>(
-                'POSTGRES__DATABASE',
+                'POSTGRES_DB',
                 'database',
             ),
             entities: TypeOrmModels,
